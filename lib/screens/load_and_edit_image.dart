@@ -10,6 +10,9 @@ import 'package:image_picker/image_picker.dart';
 //API
 import '../api/remove_background_api.dart';
 
+//Widgets
+import '../edit_image/background_colors.dart';
+
 class LoadAndEditImage extends StatefulWidget {
   @override
   State<LoadAndEditImage> createState() => _LoadAndEditImageState();
@@ -20,18 +23,12 @@ class _LoadAndEditImageState extends State<LoadAndEditImage> {
   bool editMode = false;
   bool removedBackground = false;
   bool isLoading = false;
+  bool saveLoading = false;
   Uint8List? image;
   String imagePath = '';
 
   ScreenshotController screenshotController = ScreenshotController();
   var backgroungColor = Colors.transparent;
-  List newBackgroundColors = [
-    Colors.transparent,
-    Colors.white,
-    Colors.red,
-    Colors.green,
-    Colors.orange,
-  ];
 
   void pickImage() async {
     final pickedImage = await ImagePicker().pickImage(
@@ -56,24 +53,36 @@ class _LoadAndEditImageState extends State<LoadAndEditImage> {
     var fileName = "${DateTime.now().microsecondsSinceEpoch}.png";
 
     if (permission.isGranted) {
+      setState(() {
+        saveLoading = true;
+      });
+
       final directory = Directory(directoryPath);
 
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
 
-      await screenshotController.captureAndSave(
+      await screenshotController
+          .captureAndSave(
         directory.path,
-        delay: Duration(milliseconds: 100),
+        delay: const Duration(milliseconds: 100),
         fileName: fileName,
         pixelRatio: 10.0,
-      );
+      )
+          .then((value) {
+        setState(() {
+          saveLoading = false;
+        });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Salvo em ${directory.path}'),
-        ),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Salvo em ${directory.path}'),
+          ),
+        );
+
+        Navigator.of(context).pop();
+      });
     }
   }
 
@@ -87,87 +96,85 @@ class _LoadAndEditImageState extends State<LoadAndEditImage> {
           title: Text('Remover Fundo'),
           actions: [
             IconButton(
-              onPressed: () {
-                saveImage();
-              },
+              onPressed: !editMode
+                  ? () {
+                      saveImage();
+                    }
+                  : null,
               icon: Icon(Icons.save),
             ),
             const SizedBox(width: 10.0),
           ],
         ),
-        body: Column(
+        body: Stack(
           children: [
-            removedBackground
-                ? Center(
-                    child: Container(
-                      height: editMode ? 400 : mediaQuary.height - 150,
-                      child: Screenshot(
-                        controller: screenshotController,
-                        child: Container(
-                          color: backgroungColor,
-                          child: Image.memory(
-                            image!,
-                            filterQuality: FilterQuality.high,
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  removedBackground
+                      ? Center(
+                          child: Screenshot(
+                            controller: screenshotController,
+                            child: Container(
+                              color: backgroungColor,
+                              child: Image.memory(
+                                image!,
+                                height: editMode ? 400 : mediaQuary.height,
+                                filterQuality: FilterQuality.high,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  )
-                : loaded
-                    ? GestureDetector(
-                        onTap: pickImage,
-                        child: Container(
-                          height: mediaQuary.height - 150,
-                          width: mediaQuary.width,
-                          child: Image.file(File(imagePath)),
-                        ),
-                      )
-                    : Center(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            pickImage();
-                          },
-                          child: Text('Carregar Imagem'),
-                        ),
-                      ),
-            if (editMode) const SizedBox(height: 10.0),
-            if (editMode)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          backgroungColor = newBackgroundColors[1];
-                        });
+                        )
+                      : loaded
+                          ? GestureDetector(
+                              onTap: pickImage,
+                              child: Image.file(
+                                File(imagePath),
+                                height: mediaQuary.height,
+                                width: mediaQuary.width,
+                              ),
+                            )
+                          : Center(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  pickImage();
+                                },
+                                child: Text('Carregar Imagem'),
+                              ),
+                            ),
+                  if (editMode)
+                    GridView.builder(
+                      itemCount: 10,
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: BackgroundColors(
+                            colorSelected: index,
+                            callback: (value) {
+                              setState(() {
+                                backgroungColor = value;
+                              });
+                            },
+                          ),
+                        );
                       },
-                      child: Container(
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          color: Colors.white,
-                        ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 5,
+                        crossAxisSpacing: 1.0,
+                        mainAxisSpacing: 1.0,
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          backgroungColor = newBackgroundColors[2];
-                        });
-                      },
-                      child: Container(
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                    )
+                ],
+              ),
+            ),
+            if (saveLoading)
+              Container(
+                color: Colors.black54,
+                child: const Center(
+                    child: CircularProgressIndicator(color: Colors.orange)),
               ),
           ],
         ),
@@ -180,32 +187,42 @@ class _LoadAndEditImageState extends State<LoadAndEditImage> {
                 },
                 backgroundColor: Colors.orange,
                 elevation: 0,
-                child: const Icon((Icons.edit)),
+                child: Icon(!editMode ? Icons.edit : Icons.save),
               )
             : const SizedBox.shrink(),
         bottomNavigationBar: SizedBox(
           height: 60,
-          child: ElevatedButton(
-            onPressed: loaded
-                ? () async {
-                    setState(() {
-                      isLoading = true;
-                    });
+          child: removedBackground
+              ? ElevatedButton(
+                  onPressed: saveLoading
+                      ? null
+                      : () {
+                          Navigator.of(context).pop();
+                        },
+                  child: Text('Cancelar'),
+                )
+              : ElevatedButton(
+                  onPressed: loaded
+                      ? () async {
+                          setState(() {
+                            isLoading = true;
+                          });
 
-                    image = await RemoveBgApi.removeBackground(
-                      imagePath: imagePath,
-                    );
+                          image = await RemoveBgApi.removeBackground(
+                            imagePath: imagePath,
+                          );
 
-                    if (image != null) {
-                      removedBackground = true;
-                      isLoading = false;
-                      setState(() {});
-                    }
-                  }
-                : null,
-            child:
-                isLoading ? CircularProgressIndicator() : Text('Remover Fundo'),
-          ),
+                          if (image != null) {
+                            removedBackground = true;
+                            isLoading = false;
+                            setState(() {});
+                          }
+                        }
+                      : null,
+                  child: isLoading
+                      ? CircularProgressIndicator()
+                      : Text('Remover Fundo'),
+                ),
         ));
   }
 }
