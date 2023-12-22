@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 //Screens
 import './screens/home_page.dart';
-import './screens/load_and_edit_image.dart';
 
 void main() {
   runApp(const MyApp());

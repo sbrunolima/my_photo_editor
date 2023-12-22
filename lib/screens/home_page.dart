@@ -1,17 +1,12 @@
 import 'dart:io';
-import 'dart:convert';
-import 'dart:typed_data';
-import 'package:before_after/before_after.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:screenshot/screenshot.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-//Screens
-import '../screens/load_and_edit_image.dart';
+//Widgets
+import '../filter_screen/filters_container.dart';
 
-//API
-import '../api/remove_background_api.dart';
+//Utils
+import '../utils/filters.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -19,33 +14,100 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final List<List<double>> filters = [
+    NOFILTER,
+    PURPLE,
+    SEPIUM,
+    OLDTIMES,
+    BLACKWHITE,
+  ];
+
+  var selectedFilter;
+  String imagePath = '';
+  @override
+  void initState() {
+    super.initState();
+    selectedFilter = filters[0];
+  }
+
+  void pickImage() async {
+    final pickedImage = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 100,
+    );
+
+    if (pickedImage != null) {
+      imagePath = pickedImage.path;
+
+      setState(() {});
+    } else {
+      //Handle error
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    //Get the device size
-    final mediaQuary = MediaQuery.of(context).size;
-
+    final size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Remover Fundo'),
-      ),
-      body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => LoadAndEditImage(),
-                  ),
-                );
-              },
-              child: Text('Carregar Imagem'),
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: Text('Photo Editor'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              onPressed: pickImage,
+              icon: Icon(Icons.add),
             ),
           ],
         ),
-      ),
-    );
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                  maxHeight: size.height - 300,
+                  maxWidth: size.width,
+                ),
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.matrix(selectedFilter),
+                  child: Image.file(
+                    File(imagePath),
+                    width: size.width,
+                    //fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10.0),
+            ],
+          ),
+        ),
+        bottomNavigationBar: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Divider(color: Colors.white),
+            Container(
+              height: 70,
+              color: Colors.black,
+              child: ListView.builder(
+                  itemCount: filters.length,
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: FilterContainer(
+                          imagePath: imagePath,
+                          filter: filters[index],
+                          selectedFilter: (filter) {
+                            setState(() {
+                              selectedFilter = filter;
+                            });
+                          }),
+                    );
+                  }),
+            ),
+          ],
+        ));
   }
 }
