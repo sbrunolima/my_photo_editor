@@ -1,6 +1,14 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:async';
+import 'dart:typed_data';
+import 'package:multiple_images_picker/multiple_images_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+//Screens
+import '../screens/photo_view_page.dart';
 
 //Widgets
 import '../filter_screen/filters_container.dart';
@@ -14,100 +22,96 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<List<double>> filters = [
-    NOFILTER,
-    PURPLE,
-    SEPIUM,
-    OLDTIMES,
-    BLACKWHITE,
-  ];
+  Future<List<AssetEntity>> _getImagesFromStorage() async {
+    try {
+      var permission = await Permission.storage.request();
 
-  var selectedFilter;
-  String imagePath = '';
-  @override
-  void initState() {
-    super.initState();
-    selectedFilter = filters[0];
-  }
+      if (permission.isGranted) {
+        // Retrieve all images
+        final List<AssetPathEntity> images =
+            await PhotoManager.getAssetPathList();
+        AssetPathEntity? path =
+            images.where((path) => path.name == "Camera").first;
 
-  void pickImage() async {
-    final pickedImage = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 100,
-    );
+        // Filter images based on the specified custom path
+        var filteredImages = await path.getAssetListRange(
+          start: 0,
+          end: images[0].assetCount,
+        );
 
-    if (pickedImage != null) {
-      imagePath = pickedImage.path;
-
-      setState(() {});
-    } else {
-      //Handle error
+        return filteredImages;
+      }
+    } catch (e) {
+      print('Error getting images: $e');
     }
+
+    return [];
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          title: Text('Photo Editor'),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              onPressed: pickImage,
-              icon: Icon(Icons.add),
-            ),
-          ],
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                constraints: BoxConstraints(
-                  maxHeight: size.height - 300,
-                  maxWidth: size.width,
-                ),
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.matrix(selectedFilter),
-                  child: Image.file(
-                    File(imagePath),
-                    width: size.width,
-                    //fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10.0),
-            ],
-          ),
-        ),
-        bottomNavigationBar: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Divider(color: Colors.white),
-            Container(
-              height: 70,
-              color: Colors.black,
-              child: ListView.builder(
-                  itemCount: filters.length,
-                  scrollDirection: Axis.horizontal,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                      child: FilterContainer(
-                          imagePath: imagePath,
-                          filter: filters[index],
-                          selectedFilter: (filter) {
-                            setState(() {
-                              selectedFilter = filter;
-                            });
-                          }),
-                    );
-                  }),
-            ),
-          ],
-        ));
+      //backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text('Photo Editor'),
+        centerTitle: true,
+        actions: [],
+      ),
+      body: FutureBuilder(
+        future: _getImagesFromStorage(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            List<AssetEntity> images = snapshot.data as List<AssetEntity>;
+            return _buildImageGrid(images);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildImageGrid(List<AssetEntity> images) {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 2.0,
+        mainAxisSpacing: 2.0,
+      ),
+      itemCount: images.length,
+      itemBuilder: (context, index) {
+        return FutureBuilder(
+          future: Future.wait([
+            images[index].thumbnailData,
+            images[index].originFile,
+          ]),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else {
+              Uint8List thumbData = snapshot.data![0] as Uint8List;
+              File originFile = snapshot.data![1] as File;
+              String fileName = images[index].title.toString();
+
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                        builder: (context) => PhotoViewPage(
+                            imagePath: '${originFile.parent.path}/$fileName')),
+                  );
+                },
+                child: Image.memory(thumbData, fit: BoxFit.cover),
+              );
+            }
+          },
+        );
+      },
+    );
   }
 }
