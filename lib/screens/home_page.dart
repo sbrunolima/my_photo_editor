@@ -29,7 +29,8 @@ class _HomePageState extends State<HomePage> {
       if (permission.isGranted) {
         // Retrieve all images
         final List<AssetPathEntity> images =
-            await PhotoManager.getAssetPathList();
+            await PhotoManager.getAssetPathList(
+                onlyAll: false, type: RequestType.image);
         AssetPathEntity? path =
             images.where((path) => path.name == "Camera").first;
 
@@ -96,14 +97,17 @@ class _HomePageState extends State<HomePage> {
             } else {
               Uint8List thumbData = snapshot.data![0] as Uint8List;
               File originFile = snapshot.data![1] as File;
-              String fileName = images[index].title.toString();
+              String imageName = images[index].title.toString();
 
               return GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                        builder: (context) => PhotoViewPage(
-                            imagePath: '${originFile.parent.path}/$fileName')),
+                      builder: (context) => PhotoViewPage(
+                        imagePath: '${originFile.parent.path}/$imageName',
+                        imageName: imageName,
+                      ),
+                    ),
                   );
                 },
                 child: Image.memory(thumbData, fit: BoxFit.cover),

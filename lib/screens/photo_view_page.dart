@@ -1,14 +1,20 @@
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:enefty_icons/enefty_icons.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 //Screens
 import '../screens/crop_image.dart';
 
+//Widgets
+import '../photo_view_page/photo_view_page_buttons.dart';
+
 class PhotoViewPage extends StatefulWidget {
   final String imagePath;
+  final String imageName;
 
-  PhotoViewPage({required this.imagePath});
+  PhotoViewPage({required this.imagePath, required this.imageName});
 
   @override
   State<PhotoViewPage> createState() => _PhotoViewPageState();
@@ -16,22 +22,31 @@ class PhotoViewPage extends StatefulWidget {
 
 class _PhotoViewPageState extends State<PhotoViewPage> {
   String editedPath = '';
+  bool isInit = true;
+  bool isLoadig = false;
 
   @override
   void initState() {
     super.initState();
-    editedPath = widget.imagePath;
+    if (isInit) {
+      editedPath = widget.imagePath;
+    }
+
+    isInit = false;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(),
-      body: Column(
-        children: [
-          Image.file(File(editedPath)),
-        ],
-      ),
+      body: isLoadig
+          ? CircularProgressIndicator()
+          : Column(
+              children: [
+                Image.file(File(editedPath)),
+              ],
+            ),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -43,24 +58,30 @@ class _PhotoViewPageState extends State<PhotoViewPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => CropImagePage(
-                            imagePath: widget.imagePath,
-                            callback: (value) {
-                              setState(() {
-                                editedPath = value.toString();
-                              });
-                            },
-                          ),
-                        ),
-                      );
+                  PhotoViewPageButtons(
+                    pageRoute: 0,
+                    buttonName: 'Recortar',
+                    imagePath: editedPath,
+                    imageName: widget.imageName,
+                    callback: (value) {
+                      setState(() {
+                        editedPath = '';
+                        editedPath = value.toString();
+                      });
                     },
-                    child: Icon(EneftyIcons.crop_outline),
                   ),
-                  Icon(Icons.edit),
+                  PhotoViewPageButtons(
+                    pageRoute: 1,
+                    buttonName: 'Filtros',
+                    imagePath: editedPath,
+                    imageName: widget.imageName,
+                    callback: (value) {
+                      setState(() {
+                        editedPath = '';
+                        editedPath = value.toString();
+                      });
+                    },
+                  ),
                   Icon(Icons.edit),
                   Icon(Icons.edit),
                 ],
