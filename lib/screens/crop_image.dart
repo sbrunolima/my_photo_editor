@@ -1,19 +1,26 @@
 import 'dart:io';
+import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 
+//Widgets
+import '../widgets/my_back_icon.dart';
+
 class CropImagePage extends StatefulWidget {
   final String imagePath;
   final String imageName;
-  final Function(String) callback;
+  final bool isEditing;
+  final Function(String, bool) callback;
 
-  CropImagePage(
-      {required this.imagePath,
-      required this.imageName,
-      required this.callback});
+  CropImagePage({
+    required this.imagePath,
+    required this.imageName,
+    required this.isEditing,
+    required this.callback,
+  });
 
   @override
   State<CropImagePage> createState() => _CropImagePageState();
@@ -33,21 +40,30 @@ class _CropImagePageState extends State<CropImagePage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Editar Imagem'),
+        backgroundColor: Colors.black,
+        leading: MyBackIcon(),
+        title: Text(
+          'Recortar',
+          style: GoogleFonts.openSans(
+            color: Colors.white,
+          ),
+        ),
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {
-              saveImage();
-            },
+            onPressed: cropImage,
             icon: const Icon(
-              Icons.save,
+              EneftyIcons.gallery_edit_bold,
               color: Colors.orange,
+              size: 30,
             ),
           ),
-          const SizedBox(width: 4.0),
+          const SizedBox(width: 5.0),
         ],
       ),
       body: Center(
@@ -58,26 +74,35 @@ class _CropImagePageState extends State<CropImagePage> {
               )
             : const SizedBox(),
       ),
+      //SAVE BUTTOM
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 0.0),
+        padding: const EdgeInsets.symmetric(horizontal: 18.0),
         child: GestureDetector(
-          onTap: cropImage,
+          onTap: saveImage,
           child: Container(
-            height: 60,
-            width: MediaQuery.of(context).size.width,
+            height: 55,
+            width: size.width,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.transparent),
-              borderRadius: BorderRadius.circular(0.0),
-              color: Colors.orange.shade900,
+              borderRadius: BorderRadius.circular(6.0),
+              color: Colors.white30,
             ),
-            child: const Center(
-              child: Text(
-                'Editar',
-                style: TextStyle(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  EneftyIcons.brush_2_bold,
                   color: Colors.white,
-                  fontSize: 16,
+                  size: 20,
                 ),
-              ),
+                const SizedBox(width: 4.0),
+                Text(
+                  'Salvar',
+                  style: GoogleFonts.openSans(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                )
+              ],
             ),
           ),
         ),
@@ -121,7 +146,7 @@ class _CropImagePageState extends State<CropImagePage> {
     var permission = await Permission.storage.request();
 
     var directoryPath = "/storage/emulated/0/Pictures/MyPhotoEditor";
-    var fileName = "${widget.imageName}-edited-copy.png";
+    var fileName = "${DateTime.now().microsecondsSinceEpoch}.png";
     var finalSavePath = '$directoryPath/$fileName';
 
     if (permission.isGranted) {
@@ -131,7 +156,7 @@ class _CropImagePageState extends State<CropImagePage> {
         await directory.create(recursive: true);
       }
 
-      if (widget.imagePath.toLowerCase() == finalSavePath.toLowerCase()) {
+      if (widget.isEditing) {
         //IF THE FILE EXISTS, IT WILL DELETE THE OLD ANDE SAVE THE NEW
         deleteImage();
         //SAVE THE NEW
@@ -143,13 +168,17 @@ class _CropImagePageState extends State<CropImagePage> {
           pixelRatio: 4.0,
         )
             .then((value) {
+          setState(() {
+            temporaryPath = finalSavePath;
+          });
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Salvo em $value'),
+              content: Text('Salvo em ${directory.path}'),
             ),
           );
 
-          widget.callback(value.toString());
+          widget.callback(temporaryPath, true);
           Navigator.of(context).pop();
         });
       } else {
@@ -172,7 +201,7 @@ class _CropImagePageState extends State<CropImagePage> {
             ),
           );
 
-          widget.callback(temporaryPath);
+          widget.callback(temporaryPath, true);
           Navigator.of(context).pop();
         });
       }
@@ -180,7 +209,7 @@ class _CropImagePageState extends State<CropImagePage> {
   }
 
   Future<void> deleteImage() async {
-    if (widget.imagePath == null) return;
+    if (widget.imagePath.isEmpty) return;
 
     final status = await Permission.storage.request();
     if (status.isGranted) {

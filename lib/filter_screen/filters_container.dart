@@ -1,9 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-//Utils
-import '../utils/filters.dart';
-
 class FilterContainer extends StatelessWidget {
   final String imagePath;
   final List<double> filter;
@@ -21,16 +18,19 @@ class FilterContainer extends StatelessWidget {
         selectedFilter(filter);
       },
       child: Container(
-        constraints: const BoxConstraints(
-          maxHeight: 70,
-          maxWidth: 70,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6.0),
         ),
         child: ColorFiltered(
           colorFilter: ColorFilter.matrix(filter),
-          child: Image.file(
-            File(imagePath),
-            width: 70,
-            fit: BoxFit.cover,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6.0),
+            child: Image.file(
+              File(imagePath),
+              width: 60,
+              height: 60,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ),

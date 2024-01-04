@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:file_manager/file_manager.dart';
@@ -10,6 +12,7 @@ import '../screens/photo_view_page.dart';
 
 //Widgets
 import '../filter_screen/filters_container.dart';
+import '../widgets/my_back_icon.dart';
 
 //Utils
 import '../utils/filters.dart';
@@ -19,12 +22,15 @@ class EditFilterPage extends StatefulWidget {
 
   final String imagePath;
   final String imageName;
-  final Function(String) callback;
+  final bool isEditing;
+  final Function(String, bool) callback;
 
-  EditFilterPage(
-      {required this.imagePath,
-      required this.imageName,
-      required this.callback});
+  EditFilterPage({
+    required this.imagePath,
+    required this.imageName,
+    required this.isEditing,
+    required this.callback,
+  });
 
   @override
   State<EditFilterPage> createState() => _EditFilterPageState();
@@ -55,88 +61,99 @@ class _EditFilterPageState extends State<EditFilterPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        // leading: IconButton(
-        //   onPressed: () {
-        //     Navigator.of(context).pop();
-
-        //     if (temporaryPath.isNotEmpty) {
-        //       widget.callback(temporaryPath);
-        //     }
-        //   },
-        //   icon: const Icon(
-        //     Icons.arrow_back,
-        //     color: Colors.red,
-        //   ),
-        // ),
-        title: Text('Photo Editor'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              saveImage();
-            },
-            icon: Icon(Icons.add),
+        backgroundColor: Colors.black,
+        leading: MyBackIcon(),
+        title: Text(
+          'Filtros',
+          style: GoogleFonts.openSans(
+            color: Colors.white,
           ),
-        ],
+        ),
+        centerTitle: true,
       ),
-      body: Center(
+      body: Screenshot(
+        controller: screenshotController,
+        child: ColorFiltered(
+          colorFilter: ColorFilter.matrix(selectedFilter),
+          child: Image.file(
+            imageFile!,
+            width: size.width,
+            height: size.height,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        height: 145,
+        color: Colors.black,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Screenshot(
-              controller: screenshotController,
-              child: Container(
-                constraints: BoxConstraints(
-                  maxHeight: size.height - 300,
-                  maxWidth: size.width,
-                ),
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.matrix(selectedFilter),
-                  child: Image.file(
-                    imageFile!,
-                    width: size.width,
-                    //fit: BoxFit.cover,
+            //FILTERS WIDGET
+            SizedBox(
+              height: 60,
+              child: ListView.builder(
+                itemCount: filters.length,
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                    child: FilterContainer(
+                      imagePath: widget.imagePath,
+                      filter: filters[index],
+                      selectedFilter: (filter) {
+                        setState(
+                          () {
+                            selectedFilter = filter;
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            //SAVE BUTTOM
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: GestureDetector(
+                onTap: saveImage,
+                child: Container(
+                  height: 55,
+                  width: size.width,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6.0),
+                    color: Colors.white30,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        EneftyIcons.brush_2_bold,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 4.0),
+                      Text(
+                        'Salvar',
+                        style: GoogleFonts.openSans(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      )
+                    ],
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 10.0),
           ],
         ),
-      ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Divider(color: Colors.white),
-          Container(
-            height: 70,
-            color: Colors.black,
-            child: ListView.builder(
-              itemCount: filters.length,
-              scrollDirection: Axis.horizontal,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                  child: FilterContainer(
-                    imagePath: widget.imagePath,
-                    filter: filters[index],
-                    selectedFilter: (filter) {
-                      setState(
-                        () {
-                          selectedFilter = filter;
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -145,7 +162,7 @@ class _EditFilterPageState extends State<EditFilterPage> {
     var permission = await Permission.storage.request();
 
     var directoryPath = "/storage/emulated/0/Pictures/MyPhotoEditor";
-    var fileName = "${widget.imageName}-edited-copy.png";
+    var fileName = "${DateTime.now().microsecondsSinceEpoch}.png";
     var finalSavePath = '$directoryPath/$fileName';
 
     if (permission.isGranted) {
@@ -155,7 +172,7 @@ class _EditFilterPageState extends State<EditFilterPage> {
         await directory.create(recursive: true);
       }
 
-      if (widget.imagePath.toLowerCase() == finalSavePath.toLowerCase()) {
+      if (widget.isEditing) {
         //IF THE FILE EXISTS, IT WILL DELETE THE OLD ANDE SAVE THE NEW
         deleteImage();
         //SAVE THE NEW
@@ -177,7 +194,7 @@ class _EditFilterPageState extends State<EditFilterPage> {
             ),
           );
 
-          widget.callback(temporaryPath);
+          widget.callback(temporaryPath, true);
           Navigator.of(context).pop();
         });
       } else {
@@ -200,7 +217,7 @@ class _EditFilterPageState extends State<EditFilterPage> {
             ),
           );
 
-          widget.callback(temporaryPath);
+          widget.callback(temporaryPath, true);
           Navigator.of(context).pop();
         });
       }
@@ -208,7 +225,7 @@ class _EditFilterPageState extends State<EditFilterPage> {
   }
 
   Future<void> deleteImage() async {
-    if (widget.imagePath == null) return;
+    if (widget.imagePath.isEmpty) return;
 
     final status = await Permission.storage.request();
     if (status.isGranted) {

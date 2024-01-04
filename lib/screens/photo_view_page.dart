@@ -9,6 +9,7 @@ import '../screens/crop_image.dart';
 
 //Widgets
 import '../photo_view_page/photo_view_page_buttons.dart';
+import '../widgets/my_back_icon.dart';
 
 class PhotoViewPage extends StatefulWidget {
   final String imagePath;
@@ -23,7 +24,7 @@ class PhotoViewPage extends StatefulWidget {
 class _PhotoViewPageState extends State<PhotoViewPage> {
   String editedPath = '';
   bool isInit = true;
-  bool isLoadig = false;
+  bool isEditing = false;
 
   @override
   void initState() {
@@ -39,14 +40,13 @@ class _PhotoViewPageState extends State<PhotoViewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(),
-      body: isLoadig
-          ? CircularProgressIndicator()
-          : Column(
-              children: [
-                Image.file(File(editedPath)),
-              ],
-            ),
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        leading: MyBackIcon(),
+      ),
+      body: Center(
+        child: Image.file(File(editedPath)),
+      ),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -63,10 +63,11 @@ class _PhotoViewPageState extends State<PhotoViewPage> {
                     buttonName: 'Recortar',
                     imagePath: editedPath,
                     imageName: widget.imageName,
-                    callback: (value) {
+                    isEditing: isEditing,
+                    callback: (newImagePath, newEditValue) {
                       setState(() {
-                        editedPath = '';
-                        editedPath = value.toString();
+                        editedPath = newImagePath;
+                        isEditing = newEditValue;
                       });
                     },
                   ),
@@ -75,10 +76,24 @@ class _PhotoViewPageState extends State<PhotoViewPage> {
                     buttonName: 'Filtros',
                     imagePath: editedPath,
                     imageName: widget.imageName,
-                    callback: (value) {
+                    isEditing: isEditing,
+                    callback: (newImagePath, newEditValue) {
                       setState(() {
-                        editedPath = '';
-                        editedPath = value.toString();
+                        editedPath = newImagePath;
+                        isEditing = newEditValue;
+                      });
+                    },
+                  ),
+                  PhotoViewPageButtons(
+                    pageRoute: 2,
+                    buttonName: 'Contraste',
+                    imagePath: editedPath,
+                    imageName: widget.imageName,
+                    isEditing: isEditing,
+                    callback: (newImagePath, newEditValue) {
+                      setState(() {
+                        editedPath = newImagePath;
+                        isEditing = newEditValue;
                       });
                     },
                   ),

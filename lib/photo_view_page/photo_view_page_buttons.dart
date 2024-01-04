@@ -12,13 +12,15 @@ class PhotoViewPageButtons extends StatelessWidget {
   final String buttonName;
   final String imagePath;
   final String imageName;
-  final Function(String) callback;
+  final bool isEditing;
+  final Function(String, bool) callback;
 
   PhotoViewPageButtons({
     required this.pageRoute,
     required this.buttonName,
     required this.imagePath,
     required this.imageName,
+    required this.isEditing,
     required this.callback,
   });
 
@@ -28,16 +30,27 @@ class PhotoViewPageButtons extends StatelessWidget {
       onTap: () {
         routes(pageRoute: pageRoute, context: context);
       },
-      child: Column(
-        children: [
-          iconAccordingOption(),
-          Text(
-            buttonName,
-            style: GoogleFonts.openSans(
-              color: Colors.white,
+      child: Container(
+        height: 70,
+        width: 70,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6.0),
+          color: Colors.white30,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            iconAccordingOption(),
+            Text(
+              buttonName,
+              style: GoogleFonts.openSans(
+                color: Colors.white,
+                fontSize: 12,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -49,8 +62,9 @@ class PhotoViewPageButtons extends StatelessWidget {
           builder: (context) => CropImagePage(
             imagePath: imagePath,
             imageName: imageName,
-            callback: (value) {
-              callback(value.toString());
+            isEditing: isEditing,
+            callback: (newImagePath, newEditValue) {
+              callback(newImagePath.toString(), newEditValue);
             },
           ),
         ),
@@ -62,8 +76,23 @@ class PhotoViewPageButtons extends StatelessWidget {
           builder: (context) => EditFilterPage(
             imagePath: imagePath,
             imageName: imageName,
-            callback: (value) {
-              callback(value.toString());
+            isEditing: isEditing,
+            callback: (newImagePath, newEditValue) {
+              callback(newImagePath.toString(), newEditValue);
+            },
+          ),
+        ),
+      );
+    }
+    if (pageRoute == 2) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => EditFilterPage(
+            imagePath: imagePath,
+            imageName: imageName,
+            isEditing: isEditing,
+            callback: (newImagePath, newEditValue) {
+              callback(newImagePath.toString(), newEditValue);
             },
           ),
         ),
@@ -77,7 +106,9 @@ class PhotoViewPageButtons extends StatelessWidget {
           ? EneftyIcons.crop_outline
           : pageRoute == 1
               ? EneftyIcons.colorfilter_outline
-              : Icons.edit,
+              : pageRoute == 2
+                  ? EneftyIcons.mask_2_bold
+                  : Icons.edit,
       color: Colors.white,
     );
   }
