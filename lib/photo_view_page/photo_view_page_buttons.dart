@@ -4,8 +4,9 @@ import 'package:enefty_icons/enefty_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 //Screens
-import '../screens/crop_image.dart';
+import '../screens/crop_image_page.dart';
 import '../filter_screen/edit_filter_page.dart';
+import '../screens/contrast_page.dart';
 
 class PhotoViewPageButtons extends StatelessWidget {
   final int pageRoute;
@@ -87,13 +88,12 @@ class PhotoViewPageButtons extends StatelessWidget {
     if (pageRoute == 2) {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => EditFilterPage(
+          builder: (context) => ImageContrastWidget(
             imagePath: imagePath,
-            imageName: imageName,
-            isEditing: isEditing,
-            callback: (newImagePath, newEditValue) {
-              callback(newImagePath.toString(), newEditValue);
-            },
+
+            // callback: (newImagePath, newEditValue) {
+            //   callback(newImagePath.toString(), newEditValue);
+            // },
           ),
         ),
       );

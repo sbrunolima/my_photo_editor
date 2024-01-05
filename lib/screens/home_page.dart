@@ -6,6 +6,7 @@ import 'package:multiple_images_picker/multiple_images_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 //Screens
 import '../screens/photo_view_page.dart';
@@ -53,9 +54,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
-      //backgroundColor: Colors.black,
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text('Photo Editor'),
+        backgroundColor: Colors.black,
+        title: Text(
+          'Photo Editor',
+          style: GoogleFonts.openSans(
+            color: Colors.white,
+          ),
+        ),
         centerTitle: true,
         actions: [],
       ),

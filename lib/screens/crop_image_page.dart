@@ -3,11 +3,11 @@ import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
 
 //Widgets
 import '../widgets/my_back_icon.dart';
+import '../widgets/save_and_delete_file_widget.dart';
 
 class CropImagePage extends StatefulWidget {
   final String imagePath;
@@ -78,7 +78,17 @@ class _CropImagePageState extends State<CropImagePage> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18.0),
         child: GestureDetector(
-          onTap: saveImage,
+          onTap: () {
+            saveImage(
+              imagePath: widget.imagePath,
+              isEditing: widget.isEditing,
+              screenshotController: screenshotController,
+              context: context,
+              callback: (newImagePath, newEditValue) {
+                widget.callback(newImagePath, newEditValue);
+              },
+            );
+          },
           child: Container(
             height: 55,
             width: size.width,
@@ -127,11 +137,8 @@ class _CropImagePageState extends State<CropImagePage> {
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.original,
           lockAspectRatio: false,
-          backgroundColor: Colors.black,
-          statusBarColor: Colors.black,
           cropFrameColor: Colors.orange.shade900,
           cropGridColor: Colors.orange.shade900,
-          dimmedLayerColor: Colors.black,
         ),
       ],
     );
@@ -139,100 +146,6 @@ class _CropImagePageState extends State<CropImagePage> {
     if (croppedFile != null) {
       imageFile = File(croppedFile.path);
       setState(() {});
-    }
-  }
-
-  void saveImage() async {
-    var permission = await Permission.storage.request();
-
-    var directoryPath = "/storage/emulated/0/Pictures/MyPhotoEditor";
-    var fileName = "${DateTime.now().microsecondsSinceEpoch}.png";
-    var finalSavePath = '$directoryPath/$fileName';
-
-    if (permission.isGranted) {
-      final directory = Directory(directoryPath);
-
-      if (!await directory.exists()) {
-        await directory.create(recursive: true);
-      }
-
-      if (widget.isEditing) {
-        //IF THE FILE EXISTS, IT WILL DELETE THE OLD ANDE SAVE THE NEW
-        deleteImage();
-        //SAVE THE NEW
-        await screenshotController
-            .captureAndSave(
-          directory.path,
-          delay: const Duration(milliseconds: 100),
-          fileName: fileName,
-          pixelRatio: 4.0,
-        )
-            .then((value) {
-          setState(() {
-            temporaryPath = finalSavePath;
-          });
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Salvo em ${directory.path}'),
-            ),
-          );
-
-          widget.callback(temporaryPath, true);
-          Navigator.of(context).pop();
-        });
-      } else {
-        //IF THE FILE IS NEW, IT WILL ONLY CREATE
-        await screenshotController
-            .captureAndSave(
-          directory.path,
-          delay: const Duration(milliseconds: 100),
-          fileName: fileName,
-          pixelRatio: 4.0,
-        )
-            .then((value) {
-          setState(() {
-            temporaryPath = finalSavePath;
-          });
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Salvo em $finalSavePath'),
-            ),
-          );
-
-          widget.callback(temporaryPath, true);
-          Navigator.of(context).pop();
-        });
-      }
-    }
-  }
-
-  Future<void> deleteImage() async {
-    if (widget.imagePath.isEmpty) return;
-
-    final status = await Permission.storage.request();
-    if (status.isGranted) {
-      final result = await deleteImageFromGallery(widget.imagePath);
-      if (result) {
-        print('STTATSU- Deleted');
-      } else {
-        // Handle error
-        print('STTATSU- Error deleting image');
-      }
-    } else {
-      // Handle permission denied
-      print('STTATSU- Storage permission denied');
-    }
-  }
-
-  Future<bool> deleteImageFromGallery(String filePath) async {
-    try {
-      await File(filePath).delete();
-      return true;
-    } catch (e) {
-      print('STTATSU- Error deleting file: $e');
-      return false;
     }
   }
 }

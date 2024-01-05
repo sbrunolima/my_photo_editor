@@ -5,7 +5,7 @@ import 'package:enefty_icons/enefty_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 //Screens
-import '../screens/crop_image.dart';
+import '../screens/crop_image_page.dart';
 
 //Widgets
 import '../photo_view_page/photo_view_page_buttons.dart';
@@ -51,7 +51,7 @@ class _PhotoViewPageState extends State<PhotoViewPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Divider(color: Colors.black),
-          Container(
+          SizedBox(
             height: 70,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 26.0),
