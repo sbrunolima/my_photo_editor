@@ -1,11 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 //Screens
 import '../screens/crop_image_page.dart';
-import '../filter_screen/edit_filter_page.dart';
+import '../screens/edit_filter_page.dart';
 import '../screens/contrast_page.dart';
 
 class PhotoViewPageButtons extends StatelessWidget {
@@ -90,10 +89,11 @@ class PhotoViewPageButtons extends StatelessWidget {
         MaterialPageRoute(
           builder: (context) => ImageContrastWidget(
             imagePath: imagePath,
-
-            // callback: (newImagePath, newEditValue) {
-            //   callback(newImagePath.toString(), newEditValue);
-            // },
+            imageName: imageName,
+            isEditing: isEditing,
+            callback: (newImagePath, newEditValue) {
+              callback(newImagePath.toString(), newEditValue);
+            },
           ),
         ),
       );

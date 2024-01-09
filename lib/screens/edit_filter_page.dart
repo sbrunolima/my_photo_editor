@@ -34,7 +34,7 @@ class EditFilterPage extends StatefulWidget {
 class _EditFilterPageState extends State<EditFilterPage> {
   ScreenshotController screenshotController = ScreenshotController();
   File? imageFile;
-  String temporaryPath = '';
+  bool isLoading = false;
 
   final List<List<double>> filters = [
     NOFILTER,
@@ -119,6 +119,10 @@ class _EditFilterPageState extends State<EditFilterPage> {
               padding: const EdgeInsets.symmetric(horizontal: 18.0),
               child: GestureDetector(
                 onTap: () {
+                  setState(() {
+                    isLoading = true;
+                  });
+
                   saveImage(
                     imagePath: widget.imagePath,
                     isEditing: widget.isEditing,
@@ -139,19 +143,22 @@ class _EditFilterPageState extends State<EditFilterPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        EneftyIcons.brush_2_bold,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 4.0),
-                      Text(
-                        'Salvar',
-                        style: GoogleFonts.openSans(
+                      if (!isLoading)
+                        const Icon(
+                          EneftyIcons.brush_2_bold,
                           color: Colors.white,
-                          fontSize: 18,
+                          size: 20,
                         ),
-                      )
+                      const SizedBox(width: 4.0),
+                      isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'Salvar',
+                              style: GoogleFonts.openSans(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            )
                     ],
                   ),
                 ),

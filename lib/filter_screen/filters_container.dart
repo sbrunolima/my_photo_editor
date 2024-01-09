@@ -6,10 +6,11 @@ class FilterContainer extends StatelessWidget {
   final List<double> filter;
   final Function(List<double>) selectedFilter;
 
-  FilterContainer(
-      {required this.imagePath,
-      required this.filter,
-      required this.selectedFilter});
+  FilterContainer({
+    required this.imagePath,
+    required this.filter,
+    required this.selectedFilter,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +20,8 @@ class FilterContainer extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6.0),
-        ),
+            borderRadius: BorderRadius.circular(6.0),
+            border: Border.all(color: Colors.grey)),
         child: ColorFiltered(
           colorFilter: ColorFilter.matrix(filter),
           child: ClipRRect(

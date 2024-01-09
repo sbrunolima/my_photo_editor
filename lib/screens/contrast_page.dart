@@ -1,106 +1,190 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show ByteData, rootBundle;
-import 'package:image_picker/image_picker.dart';
-import 'package:image/image.dart' as img;
+import 'package:enefty_icons/enefty_icons.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 //Widgets
-import '../widgets/slider_shape.dart';
+import '../widgets/my_back_icon.dart';
+import '../widgets/save_and_delete_file_widget.dart';
 
 class ImageContrastWidget extends StatefulWidget {
-  final String imagePath;
+  static const routeName = '/contrast-screen';
 
-  ImageContrastWidget({required this.imagePath});
+  final String imagePath;
+  final String imageName;
+  final bool isEditing;
+  final Function(String, bool) callback;
+
+  ImageContrastWidget({
+    required this.imagePath,
+    required this.imageName,
+    required this.isEditing,
+    required this.callback,
+  });
 
   @override
   _ImageContrastWidgetState createState() => _ImageContrastWidgetState();
 }
 
 class _ImageContrastWidgetState extends State<ImageContrastWidget> {
-  img.Image? _adjustedImage;
-  double changedValue = 100;
+  int contrastColorIndex = 0;
+  ScreenshotController screenshotController = ScreenshotController();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Image Contrast Adjustment'),
+        backgroundColor: Colors.black,
+        leading: MyBackIcon(),
+        title: Text(
+          'Contraste',
+          style: GoogleFonts.openSans(
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
       ),
-      body: Center(
-        child: _adjustedImage != null
-            ? Image.memory(Uint8List.fromList(img.encodePng(_adjustedImage!)))
-            : CircularProgressIndicator(),
+      body: Screenshot(
+        controller: screenshotController,
+        child: ColorFiltered(
+          colorFilter: ColorFilter.mode(
+              contrastColors[contrastColorIndex], BlendMode.colorBurn),
+          child: Image.file(
+            File(widget.imagePath),
+            width: size.width,
+            height: size.height,
+            fit: BoxFit.contain,
+          ),
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          loadAndAdjustImage(contrastSize: 0);
-        },
-        tooltip: 'Pick Image',
-        child: Icon(Icons.add_a_photo),
+      bottomNavigationBar: Container(
+        height: 145,
+        color: Colors.black,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            //CONTRAST LIST
+            SizedBox(
+              height: 60.0,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                itemCount: contrastColors.length,
+                itemBuilder: (context, index) {
+                  return contrastedImagesContainer(
+                      color: contrastColors[index],
+                      colorIndex: index,
+                      callback: (value) {
+                        setState(() {
+                          contrastColorIndex = value;
+                        });
+                      });
+                },
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            //SAVE BUTTOM
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isLoading = true;
+                  });
+
+                  saveImage(
+                    imagePath: widget.imagePath,
+                    isEditing: widget.isEditing,
+                    screenshotController: screenshotController,
+                    context: context,
+                    callback: (newImagePath, newEditValue) {
+                      widget.callback(newImagePath, newEditValue);
+                    },
+                  );
+                },
+                child: Container(
+                  height: 55,
+                  width: size.width,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6.0),
+                    color: Colors.white30,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (!isLoading)
+                        const Icon(
+                          EneftyIcons.brush_2_bold,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      const SizedBox(width: 4.0),
+                      isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'Salvar',
+                              style: GoogleFonts.openSans(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Future<void> loadAndAdjustImage({required double contrastSize}) async {
-    try {
-      final imagePicker = ImagePicker();
-      final XFile? pickedFile =
-          await imagePicker.pickImage(source: ImageSource.gallery);
+  List<Color> contrastColors = [
+    Colors.grey.shade100,
+    Colors.grey.shade200,
+    Colors.grey.shade300,
+    Colors.grey.shade400,
+    Colors.grey.shade500,
+    Colors.grey.shade600,
+  ];
 
-      if (pickedFile == null) {
-        // No image picked
-        return;
-      }
-
-      ByteData data = await pickedFile
-          .readAsBytes()
-          .then((bytes) => ByteData.sublistView(Uint8List.fromList(bytes)));
-      img.Image image =
-          img.decodeImage(Uint8List.fromList(data.buffer.asUint8List()))!;
-
-      // Adjust contrast using the provided contrast function
-      _adjustedImage = contrast(image,
-          contrast: contrastSize); // You can adjust the contrast value
-
-      setState(() {
-        // Trigger a rebuild to update the UI with the adjusted image
-      });
-    } catch (e) {
-      // Handle any errors that occurred during image loading
-      print('Error loading or adjusting image: $e');
-    }
-  }
-
-  img.Image contrast(img.Image src, {required num contrast}) {
-    if (contrast == 100.0) {
-      return src;
-    }
-
-    num _lastContrast = 0;
-    Uint8List _contrast = Uint8List(256);
-
-    if (contrast != _lastContrast) {
-      _lastContrast = contrast;
-
-      contrast = contrast / 100.0;
-      contrast = contrast * contrast;
-      for (var i = 0; i < 256; ++i) {
-        _contrast[i] = (((((i / 255.0) - 0.5) * contrast) + 0.5) * 255.0)
-            .clamp(0, 255)
-            .toInt();
-      }
-    }
-
-    for (final frame in src.frames) {
-      for (final p in frame) {
-        p
-          ..r = _contrast[p.r as int]
-          ..g = _contrast[p.g as int]
-          ..b = _contrast[p.b as int];
-      }
-    }
-
-    return src;
+  Widget contrastedImagesContainer({
+    required Color color,
+    required int colorIndex,
+    required Function(int) callback,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: GestureDetector(
+        onTap: () {
+          callback(colorIndex);
+        },
+        child: Container(
+          height: 60,
+          width: 60,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(6.0),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6.0),
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(color, BlendMode.colorBurn),
+              child: Image.file(
+                File(widget.imagePath),
+                height: 60,
+                width: 60,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
