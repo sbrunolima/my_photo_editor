@@ -2,20 +2,12 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:async';
 import 'dart:typed_data';
-import 'package:multiple_images_picker/multiple_images_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 //Screens
 import '../screens/photo_view_page.dart';
-
-//Widgets
-import '../filter_screen/filters_container.dart';
-
-//Utils
-import '../utils/filters.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -52,7 +44,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

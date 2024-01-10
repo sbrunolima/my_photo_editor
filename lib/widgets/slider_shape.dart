@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:enefty_icons/enefty_icons.dart';
 
 class AppSliderShape extends SliderComponentShape {
   final double thumbRadius;

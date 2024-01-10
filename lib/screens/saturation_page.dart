@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:enefty_icons/enefty_icons.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:themed/themed.dart';
 
 //Widgets
+import '../widgets/slider_shape.dart';
 import '../widgets/my_back_icon.dart';
 import '../widgets/save_and_delete_file_widget.dart';
 
-class ContrastPage extends StatefulWidget {
+class SaturationPage extends StatefulWidget {
   static const routeName = '/contrast-screen';
 
   final String imagePath;
@@ -16,7 +18,7 @@ class ContrastPage extends StatefulWidget {
   final bool isEditing;
   final Function(String, bool) callback;
 
-  ContrastPage({
+  SaturationPage({
     required this.imagePath,
     required this.imageName,
     required this.isEditing,
@@ -24,11 +26,11 @@ class ContrastPage extends StatefulWidget {
   });
 
   @override
-  State<ContrastPage> createState() => _ContrastPageState();
+  State<SaturationPage> createState() => _SaturationPageState();
 }
 
-class _ContrastPageState extends State<ContrastPage> {
-  int contrastColorIndex = 0;
+class _SaturationPageState extends State<SaturationPage> {
+  double changedValue = 0;
   ScreenshotController screenshotController = ScreenshotController();
   bool isLoading = false;
 
@@ -42,7 +44,7 @@ class _ContrastPageState extends State<ContrastPage> {
         backgroundColor: Colors.black,
         leading: MyBackIcon(),
         title: Text(
-          'Contraste',
+          'Saturação',
           style: GoogleFonts.openSans(
             color: Colors.white,
           ),
@@ -51,14 +53,10 @@ class _ContrastPageState extends State<ContrastPage> {
       ),
       body: Screenshot(
         controller: screenshotController,
-        child: ColorFiltered(
-          colorFilter: ColorFilter.mode(
-              contrastColors[contrastColorIndex], BlendMode.colorBurn),
+        child: ChangeColors(
+          saturation: changedValue,
           child: Image.file(
             File(widget.imagePath),
-            width: size.width,
-            height: size.height,
-            fit: BoxFit.contain,
           ),
         ),
       ),
@@ -68,22 +66,22 @@ class _ContrastPageState extends State<ContrastPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            //CONTRAST LIST
-            SizedBox(
-              height: 60.0,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                itemCount: contrastColors.length,
-                itemBuilder: (context, index) {
-                  return contrastedImagesContainer(
-                      color: contrastColors[index],
-                      colorIndex: index,
-                      callback: (value) {
-                        setState(() {
-                          contrastColorIndex = value;
-                        });
-                      });
+            //SATURATION BAR
+            SliderTheme(
+              data: const SliderThemeData(
+                thumbColor: Colors.green,
+                thumbShape: AppSliderShape(thumbRadius: 10),
+              ),
+              child: Slider(
+                value: changedValue,
+                min: -1,
+                max: 1,
+                divisions: 20,
+                label: changedValue.toStringAsFixed(1),
+                onChanged: (value) {
+                  setState(() {
+                    changedValue = value;
+                  });
                 },
               ),
             ),
@@ -139,50 +137,6 @@ class _ContrastPageState extends State<ContrastPage> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  List<Color> contrastColors = [
-    Colors.grey.shade100,
-    Colors.grey.shade200,
-    Colors.grey.shade300,
-    Colors.grey.shade400,
-    Colors.grey.shade500,
-    Colors.grey.shade600,
-  ];
-
-  Widget contrastedImagesContainer({
-    required Color color,
-    required int colorIndex,
-    required Function(int) callback,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: GestureDetector(
-        onTap: () {
-          callback(colorIndex);
-        },
-        child: Container(
-          height: 60,
-          width: 60,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(6.0),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(6.0),
-            child: ColorFiltered(
-              colorFilter: ColorFilter.mode(color, BlendMode.colorBurn),
-              child: Image.file(
-                File(widget.imagePath),
-                height: 60,
-                width: 60,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
         ),
       ),
     );

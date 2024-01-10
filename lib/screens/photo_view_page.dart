@@ -1,11 +1,5 @@
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
-import 'package:enefty_icons/enefty_icons.dart';
-import 'package:google_fonts/google_fonts.dart';
-
-//Screens
-import '../screens/crop_image_page.dart';
 
 //Widgets
 import '../photo_view_page/photo_view_page_buttons.dart';
@@ -54,9 +48,10 @@ class _PhotoViewPageState extends State<PhotoViewPage> {
           SizedBox(
             height: 70,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 26.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              padding: const EdgeInsets.symmetric(horizontal: 0.0),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 children: [
                   PhotoViewPageButtons(
                     pageRoute: 0,
@@ -87,6 +82,45 @@ class _PhotoViewPageState extends State<PhotoViewPage> {
                   PhotoViewPageButtons(
                     pageRoute: 2,
                     buttonName: 'Contraste',
+                    imagePath: editedPath,
+                    imageName: widget.imageName,
+                    isEditing: isEditing,
+                    callback: (newImagePath, newEditValue) {
+                      setState(() {
+                        editedPath = newImagePath;
+                        isEditing = newEditValue;
+                      });
+                    },
+                  ),
+                  PhotoViewPageButtons(
+                    pageRoute: 3,
+                    buttonName: 'Saturação',
+                    imagePath: editedPath,
+                    imageName: widget.imageName,
+                    isEditing: isEditing,
+                    callback: (newImagePath, newEditValue) {
+                      setState(() {
+                        editedPath = newImagePath;
+                        isEditing = newEditValue;
+                      });
+                    },
+                  ),
+                  PhotoViewPageButtons(
+                    pageRoute: 4,
+                    buttonName: 'Brilho',
+                    imagePath: editedPath,
+                    imageName: widget.imageName,
+                    isEditing: isEditing,
+                    callback: (newImagePath, newEditValue) {
+                      setState(() {
+                        editedPath = newImagePath;
+                        isEditing = newEditValue;
+                      });
+                    },
+                  ),
+                  PhotoViewPageButtons(
+                    pageRoute: 5,
+                    buttonName: 'Hue',
                     imagePath: editedPath,
                     imageName: widget.imageName,
                     isEditing: isEditing,

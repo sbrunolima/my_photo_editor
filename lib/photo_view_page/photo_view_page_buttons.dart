@@ -6,6 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../screens/crop_image_page.dart';
 import '../screens/edit_filter_page.dart';
 import '../screens/contrast_page.dart';
+import '../screens/saturation_page.dart';
+import '../screens/brightness_page.dart';
+import '../screens/hue_page.dart';
 
 class PhotoViewPageButtons extends StatelessWidget {
   final int pageRoute;
@@ -26,30 +29,33 @@ class PhotoViewPageButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        routes(pageRoute: pageRoute, context: context);
-      },
-      child: Container(
-        height: 70,
-        width: 70,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6.0),
-          color: Colors.white30,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            iconAccordingOption(),
-            Text(
-              buttonName,
-              style: GoogleFonts.openSans(
-                color: Colors.white,
-                fontSize: 12,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+      child: GestureDetector(
+        onTap: () {
+          routes(pageRoute: pageRoute, context: context);
+        },
+        child: Container(
+          height: 70,
+          width: 70,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(6.0),
+            color: Colors.white30,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              iconAccordingOption(),
+              Text(
+                buttonName,
+                style: GoogleFonts.openSans(
+                  color: Colors.white,
+                  fontSize: 12,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -87,7 +93,49 @@ class PhotoViewPageButtons extends StatelessWidget {
     if (pageRoute == 2) {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ImageContrastWidget(
+          builder: (context) => ContrastPage(
+            imagePath: imagePath,
+            imageName: imageName,
+            isEditing: isEditing,
+            callback: (newImagePath, newEditValue) {
+              callback(newImagePath.toString(), newEditValue);
+            },
+          ),
+        ),
+      );
+    }
+    if (pageRoute == 3) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => SaturationPage(
+            imagePath: imagePath,
+            imageName: imageName,
+            isEditing: isEditing,
+            callback: (newImagePath, newEditValue) {
+              callback(newImagePath.toString(), newEditValue);
+            },
+          ),
+        ),
+      );
+    }
+    if (pageRoute == 4) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => BrightnessPage(
+            imagePath: imagePath,
+            imageName: imageName,
+            isEditing: isEditing,
+            callback: (newImagePath, newEditValue) {
+              callback(newImagePath.toString(), newEditValue);
+            },
+          ),
+        ),
+      );
+    }
+    if (pageRoute == 5) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => HuePage(
             imagePath: imagePath,
             imageName: imageName,
             isEditing: isEditing,
@@ -108,7 +156,13 @@ class PhotoViewPageButtons extends StatelessWidget {
               ? EneftyIcons.colorfilter_outline
               : pageRoute == 2
                   ? EneftyIcons.mask_2_bold
-                  : Icons.edit,
+                  : pageRoute == 3
+                      ? EneftyIcons.drop_bold
+                      : pageRoute == 4
+                          ? EneftyIcons.sun_bold
+                          : pageRoute == 5
+                              ? EneftyIcons.mirror_bold
+                              : Icons.edit,
       color: Colors.white,
     );
   }

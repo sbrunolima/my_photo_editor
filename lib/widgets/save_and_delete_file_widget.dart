@@ -1,17 +1,7 @@
 import 'dart:io';
-import 'package:enefty_icons/enefty_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:file_manager/file_manager.dart';
-
-//Screens
-import '../screens/photo_view_page.dart';
-
-//Widgets
-import '../filter_screen/filters_container.dart';
-import '../widgets/my_back_icon.dart';
 
 //Utils
 
