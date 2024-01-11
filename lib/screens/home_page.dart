@@ -23,15 +23,28 @@ class _HomePageState extends State<HomePage> {
         // Retrieve all images
         final List<AssetPathEntity> images =
             await PhotoManager.getAssetPathList(
-                onlyAll: false, type: RequestType.image);
-        AssetPathEntity? path =
-            images.where((path) => path.name == "MyPhotoEditor").first;
-
-        // Filter images based on the specified custom path
-        var filteredImages = await path.getAssetListRange(
-          start: 0,
-          end: images[0].assetCount,
+          onlyAll: false,
+          type: RequestType.image,
         );
+
+        // Provide a list of folder names you want to include
+        List<String> folderNames = ["Camera", "Screenshots", "MyPhotoEditor"];
+
+        // Filter paths based on the specified folder names
+        List<AssetPathEntity> selectedPaths = images
+            .where((path) =>
+                folderNames.any((folder) => path.name.contains(folder)))
+            .toList();
+
+        // Combine assets from all selected paths
+        List<AssetEntity> filteredImages = [];
+        for (var path in selectedPaths) {
+          var assets = await path.getAssetListRange(
+            start: 0,
+            end: path.assetCount,
+          );
+          filteredImages.addAll(assets);
+        }
 
         return filteredImages;
       }
