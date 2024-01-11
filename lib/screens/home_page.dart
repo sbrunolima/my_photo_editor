@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
             await PhotoManager.getAssetPathList(
                 onlyAll: false, type: RequestType.image);
         AssetPathEntity? path =
-            images.where((path) => path.name == "Camera").first;
+            images.where((path) => path.name == "MyPhotoEditor").first;
 
         // Filter images based on the specified custom path
         var filteredImages = await path.getAssetListRange(
