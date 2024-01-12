@@ -9,6 +9,9 @@ import 'package:google_fonts/google_fonts.dart';
 //Screens
 import '../screens/photo_view_page.dart';
 
+//Widget
+import '../widgets/custom_page_route.dart';
+
 class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => _HomePageState();
@@ -113,8 +116,8 @@ class _HomePageState extends State<HomePage> {
               return GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => PhotoViewPage(
+                    CustomPageRoute(
+                      child: PhotoViewPage(
                         imagePath: '${originFile.parent.path}/$imageName',
                         imageName: imageName,
                       ),

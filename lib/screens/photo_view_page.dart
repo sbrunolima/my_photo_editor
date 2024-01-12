@@ -47,94 +47,91 @@ class _PhotoViewPageState extends State<PhotoViewPage> {
           const Divider(color: Colors.black),
           SizedBox(
             height: 70,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 0.0),
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                children: [
-                  PhotoViewPageButtons(
-                    pageRoute: 0,
-                    buttonName: 'Recortar',
-                    imagePath: editedPath,
-                    imageName: widget.imageName,
-                    isEditing: isEditing,
-                    callback: (newImagePath, newEditValue) {
-                      setState(() {
-                        editedPath = newImagePath;
-                        isEditing = newEditValue;
-                      });
-                    },
-                  ),
-                  PhotoViewPageButtons(
-                    pageRoute: 1,
-                    buttonName: 'Filtros',
-                    imagePath: editedPath,
-                    imageName: widget.imageName,
-                    isEditing: isEditing,
-                    callback: (newImagePath, newEditValue) {
-                      setState(() {
-                        editedPath = newImagePath;
-                        isEditing = newEditValue;
-                      });
-                    },
-                  ),
-                  PhotoViewPageButtons(
-                    pageRoute: 2,
-                    buttonName: 'Contraste',
-                    imagePath: editedPath,
-                    imageName: widget.imageName,
-                    isEditing: isEditing,
-                    callback: (newImagePath, newEditValue) {
-                      setState(() {
-                        editedPath = newImagePath;
-                        isEditing = newEditValue;
-                      });
-                    },
-                  ),
-                  PhotoViewPageButtons(
-                    pageRoute: 3,
-                    buttonName: 'Saturação',
-                    imagePath: editedPath,
-                    imageName: widget.imageName,
-                    isEditing: isEditing,
-                    callback: (newImagePath, newEditValue) {
-                      setState(() {
-                        editedPath = newImagePath;
-                        isEditing = newEditValue;
-                      });
-                    },
-                  ),
-                  PhotoViewPageButtons(
-                    pageRoute: 4,
-                    buttonName: 'Brilho',
-                    imagePath: editedPath,
-                    imageName: widget.imageName,
-                    isEditing: isEditing,
-                    callback: (newImagePath, newEditValue) {
-                      setState(() {
-                        editedPath = newImagePath;
-                        isEditing = newEditValue;
-                      });
-                    },
-                  ),
-                  PhotoViewPageButtons(
-                    pageRoute: 5,
-                    buttonName: 'Hue',
-                    imagePath: editedPath,
-                    imageName: widget.imageName,
-                    isEditing: isEditing,
-                    callback: (newImagePath, newEditValue) {
-                      setState(() {
-                        editedPath = newImagePath;
-                        isEditing = newEditValue;
-                      });
-                    },
-                  ),
-                  Icon(Icons.edit),
-                  Icon(Icons.edit),
-                ],
-              ),
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              children: [
+                PhotoViewPageButtons(
+                  pageRoute: 0,
+                  buttonName: 'Recortar',
+                  imagePath: editedPath,
+                  imageName: widget.imageName,
+                  isEditing: isEditing,
+                  callback: (newImagePath, newEditValue) {
+                    setState(() {
+                      editedPath = newImagePath;
+                      isEditing = newEditValue;
+                    });
+                  },
+                ),
+                PhotoViewPageButtons(
+                  pageRoute: 1,
+                  buttonName: 'Filtros',
+                  imagePath: editedPath,
+                  imageName: widget.imageName,
+                  isEditing: isEditing,
+                  callback: (newImagePath, newEditValue) {
+                    setState(() {
+                      editedPath = newImagePath;
+                      isEditing = newEditValue;
+                    });
+                  },
+                ),
+                PhotoViewPageButtons(
+                  pageRoute: 2,
+                  buttonName: 'Contraste',
+                  imagePath: editedPath,
+                  imageName: widget.imageName,
+                  isEditing: isEditing,
+                  callback: (newImagePath, newEditValue) {
+                    setState(() {
+                      editedPath = newImagePath;
+                      isEditing = newEditValue;
+                    });
+                  },
+                ),
+                PhotoViewPageButtons(
+                  pageRoute: 3,
+                  buttonName: 'Saturação',
+                  imagePath: editedPath,
+                  imageName: widget.imageName,
+                  isEditing: isEditing,
+                  callback: (newImagePath, newEditValue) {
+                    setState(() {
+                      editedPath = newImagePath;
+                      isEditing = newEditValue;
+                    });
+                  },
+                ),
+                PhotoViewPageButtons(
+                  pageRoute: 4,
+                  buttonName: 'Brilho',
+                  imagePath: editedPath,
+                  imageName: widget.imageName,
+                  isEditing: isEditing,
+                  callback: (newImagePath, newEditValue) {
+                    setState(() {
+                      editedPath = newImagePath;
+                      isEditing = newEditValue;
+                    });
+                  },
+                ),
+                PhotoViewPageButtons(
+                  pageRoute: 5,
+                  buttonName: 'Hue',
+                  imagePath: editedPath,
+                  imageName: widget.imageName,
+                  isEditing: isEditing,
+                  callback: (newImagePath, newEditValue) {
+                    setState(() {
+                      editedPath = newImagePath;
+                      isEditing = newEditValue;
+                    });
+                  },
+                ),
+                Icon(Icons.edit),
+                Icon(Icons.edit),
+              ],
             ),
           ),
         ],

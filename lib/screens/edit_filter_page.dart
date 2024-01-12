@@ -38,9 +38,11 @@ class _EditFilterPageState extends State<EditFilterPage> {
 
   final List<List<double>> filters = [
     NOFILTER,
-    PURPLE,
-    SEPIUM,
-    OLDTIMES,
+    BRIGHTNESS,
+    HIGHLIGHTSHADOW,
+    FALSECOLOR,
+    HALFTONE,
+    GRAYSCALE,
     BLACKWHITE,
   ];
 

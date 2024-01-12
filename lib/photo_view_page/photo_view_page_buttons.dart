@@ -10,6 +10,9 @@ import '../screens/saturation_page.dart';
 import '../screens/brightness_page.dart';
 import '../screens/hue_page.dart';
 
+//Widgets
+import '../widgets/custom_page_route.dart';
+
 class PhotoViewPageButtons extends StatelessWidget {
   final int pageRoute;
   final String buttonName;
@@ -64,8 +67,8 @@ class PhotoViewPageButtons extends StatelessWidget {
   void routes({required int pageRoute, required BuildContext context}) {
     if (pageRoute == 0) {
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => CropImagePage(
+        CustomPageRoute(
+          child: CropImagePage(
             imagePath: imagePath,
             imageName: imageName,
             isEditing: isEditing,
@@ -78,8 +81,8 @@ class PhotoViewPageButtons extends StatelessWidget {
     }
     if (pageRoute == 1) {
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => EditFilterPage(
+        CustomPageRoute(
+          child: EditFilterPage(
             imagePath: imagePath,
             imageName: imageName,
             isEditing: isEditing,
@@ -92,8 +95,8 @@ class PhotoViewPageButtons extends StatelessWidget {
     }
     if (pageRoute == 2) {
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => ContrastPage(
+        CustomPageRoute(
+          child: ContrastPage(
             imagePath: imagePath,
             imageName: imageName,
             isEditing: isEditing,
@@ -106,8 +109,8 @@ class PhotoViewPageButtons extends StatelessWidget {
     }
     if (pageRoute == 3) {
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => SaturationPage(
+        CustomPageRoute(
+          child: SaturationPage(
             imagePath: imagePath,
             imageName: imageName,
             isEditing: isEditing,
@@ -120,8 +123,8 @@ class PhotoViewPageButtons extends StatelessWidget {
     }
     if (pageRoute == 4) {
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => BrightnessPage(
+        CustomPageRoute(
+          child: BrightnessPage(
             imagePath: imagePath,
             imageName: imageName,
             isEditing: isEditing,
@@ -134,8 +137,8 @@ class PhotoViewPageButtons extends StatelessWidget {
     }
     if (pageRoute == 5) {
       Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => HuePage(
+        CustomPageRoute(
+          child: HuePage(
             imagePath: imagePath,
             imageName: imageName,
             isEditing: isEditing,
