@@ -76,14 +76,14 @@ Future<void> deleteImage({required String imagePath}) async {
   if (status.isGranted) {
     final result = await deleteImageFromGallery(imagePath);
     if (result) {
-      print('STTATSU- Deleted');
+      print('STATUS- Deleted');
     } else {
       // Handle error
-      print('STTATSU- Error deleting image');
+      print('STATUS- Error deleting image');
     }
   } else {
     // Handle permission denied
-    print('STTATSU- Storage permission denied');
+    print('STATUS- Storage permission denied');
   }
 }
 
@@ -92,7 +92,7 @@ Future<bool> deleteImageFromGallery(String filePath) async {
     await File(filePath).delete();
     return true;
   } catch (e) {
-    print('STTATSU- Error deleting file: $e');
+    print('STATUS- Error deleting file: $e');
     return false;
   }
 }

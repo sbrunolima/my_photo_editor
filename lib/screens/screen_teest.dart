@@ -18,7 +18,7 @@ class _ScreenForTestsState extends State<ScreenForTests> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SliderTheme(
-            data: SliderThemeData(
+            data: const SliderThemeData(
               thumbColor: Colors.green,
               thumbShape: AppSliderShape(thumbRadius: 10),
             ),
